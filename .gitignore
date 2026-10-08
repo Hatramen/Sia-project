@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.db
+*.db-*
+*.bak
+*.log
+App.py.fixed.txt
+library_admin_note.md
+reset-local-books.md
+open-issues.md
+profile-popout-feature-plan.md

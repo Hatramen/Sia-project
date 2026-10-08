@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f4ef">
+  <title>Local Books — Community Library</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #222c27;
+      --muted: #69756e;
+      --paper: #f6f4ef;
+      --card: #fffefa;
+      --green: #28664c;
+      --green-dark: #1c4f39;
+      --line: #e3e5dc;
+      --red: #a63c32;
+      --forest: #113322;
+      --forest-2: #0d271a;
+      --sage: #c7d9cc;
+      --sage-strong: #e3efe2;
+      --white-soft: #fffefa;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .topbar { background: var(--forest); color: white; position: relative; }
+    .topbar-inner, main { width: min(1080px, calc(100% - 40px)); margin: auto; }
+    .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--sage); color: var(--forest); font-size: 21px; border: 1px solid var(--sage-strong); }
+    .brand-name { font-weight: 750; letter-spacing: -.03em; font-size: 19px; color: white; }
+    .brand-caption { color: var(--sage); font-size: 12px; margin-top: 2px; }
+    .top-actions { display: flex; align-items: center; gap: 16px; color: var(--sage); font-size: 14px; }
+    .member-name { color: var(--sage); font-weight: 400; }
+    @media (max-width: 640px) {
+      .profile-popout { width: 280px; right: -12px; }
+      .signout-btn { padding: 8px 12px; font-size: 12px; }
+      .profile-trigger { gap: 8px; }
+    }
+    main { padding: 42px 0 64px; }
+    .hero { max-width: 720px; margin-bottom: 30px; }
+    .eyebrow { color: var(--green); font-weight: 750; font-size: 12px; text-transform: uppercase; letter-spacing: .14em; }
+    h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.08; letter-spacing: -.045em; margin: 10px 0 12px; }
+    .hero p { color: var(--muted); font-size: 16px; line-height: 1.6; margin: 0; }
+    .auth-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; max-width: 820px; }
+    .auth-card { max-width: 480px; }
+    .auth-switch { color: var(--muted); font-size: 14px; margin: 18px 0 0; text-align: center; }
+    .text-button { border: 0; background: transparent; color: var(--green); font-weight: 750; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: 0 8px 26px #23352708; }
+    .panel h2 { margin: 0 0 6px; font-size: 20px; letter-spacing: -.025em; }
+    .panel-intro { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+    .field { margin: 14px 0; }
+    label { display: block; font-size: 13px; font-weight: 650; margin-bottom: 7px; }
+    input { width: 100%; padding: 11px 12px; border: 1px solid #d5dbd1; border-radius: 9px; background: white; color: var(--ink); outline: none; }
+    input:focus { border-color: var(--green); box-shadow: 0 0 0 3px #28664c20; }
+    input::placeholder { color: #9ba49b; }
+    .button { min-height: 40px; border: 0; border-radius: 9px; padding: 10px 15px; background: var(--green); color: white; font-weight: 700; transition: background .15s, transform .15s; }
+    .button:hover { background: var(--green-dark); }
+    .button:active { transform: translateY(1px); }
+    .button:disabled { cursor: not-allowed; background: #9aa79e; }
+    .button-secondary { background: #e7eee7; color: var(--green-dark); }
+    .button-secondary:hover { background: #dce8dc; }
+    .button-small { min-height: 34px; padding: 7px 11px; font-size: 13px; }
+    .role-pill { background: var(--sage); color: var(--forest); border-radius: 99px; padding: 5px 12px; font-size: 11px; font-weight: 750; letter-spacing: .04em; }
+    .signout-btn { background: var(--white-soft); color: var(--forest); border-radius: 99px; padding: 8px 16px; font-weight: 650; font-size: 13px; border: 1px solid transparent; }
+    .signout-btn:hover { background: #fff; }
+    .profile-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--sage); color: var(--forest); display: grid; place-items: center; font-weight: 700; border: 2px solid var(--sage-strong); }
+    .profile-trigger { background: transparent; border: 0; cursor: pointer; color: white; padding: 6px; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+    .profile-trigger:hover { background: rgba(255,255,255,.08); }
+    .profile-trigger:focus-visible { outline: 2px solid var(--sage-strong); outline-offset: 2px; }
+    .profile-popout { position: absolute; top: calc(100% + 12px); right: 0; width: 300px; background: var(--white-soft); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,.25); border: 1px solid var(--line); padding: 6px; z-index: 60; display: none; transform: translateY(6px) scale(.98); opacity: 0; transition: opacity .18s ease, transform .18s ease; }
+    .profile-popout.open { display: block; transform: translateY(0) scale(1); opacity: 1; }
+    .profile-popout h3 { margin: 6px 6px 8px; font-size: 16px; color: var(--forest); }
+    .profile-user { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: 10px; background: var(--paper); margin-bottom: 8px; }
+    .profile-user .user-name { font-weight: 650; color: var(--ink); }
+    .profile-user .user-meta { font-size: 12px; color: var(--muted); word-break: break-word; }
+    .profile-section { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 4px; }
+    .profile-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 10px 4px; font-weight: 700; }
+    .profile-menu { list-style: none; padding: 0; margin: 0; }
+    .profile-menu li { border-radius: 8px; }
+    .profile-menu button { width: 100%; background: transparent; border: 0; text-align: left; padding: 9px 10px; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; }
+    .profile-menu button:hover { background: var(--paper); }
+    .profile-menu button:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+    .profile-menu .icon { opacity: .7; }
+    .profile-popout-backdrop { position: fixed; inset: 0; z-index: 50; display: none; }
+    .profile-popout-backdrop.show { display: block; }
+    .manage-account { padding: 10px 10px 12px; }
+    .manage-account p { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 10px; }
+    .manage-account .field { margin: 10px 0; }
+    .manage-account label { font-size: 12px; }
+    .manage-account input { padding: 8px 10px; font-size: 13px; }
+    .full-button { width: 100%; margin-top: 4px; }
+    .notice { border-radius: 10px; padding: 12px 14px; margin: 0 0 20px; font-size: 14px; }
+    .notice[hidden] { display: none; }
+    .notice-error { color: #812d26; background: #f9e8e5; border: 1px solid #efd0cb; }
+    .notice-success { color: #215c40; background: #e6f1e9; border: 1px solid #cfe3d4; }
+    .welcome { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .welcome h1 { font-size: clamp(30px, 4vw, 40px); margin-bottom: 6px; }
+    .welcome p { color: var(--muted); margin: 0; }
+    .workspace-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(270px, .9fr); align-items: start; gap: 18px; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .section-heading h2 { margin: 0; }
+    .section-heading input { max-width: 245px; }
+    .book-filters { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(130px, 1fr)); gap: 9px; margin-bottom: 16px; }
+    select { width: 100%; padding: 10px 11px; border: 1px solid #d5dbd1; border-radius: 9px; background: white; color: var(--ink); }
+    select:focus { border-color: var(--green); outline: 3px solid #28664c20; }
+    .admin-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 820px; margin: 20px 0; }
+    .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 15px 17px; }
+    .stat-card strong { display: block; font-size: 23px; letter-spacing: -.03em; }
+    .stat-card span { color: var(--muted); font-size: 12px; }
+    .role-tag { border-radius: 99px; background: #dce8d9; color: var(--green-dark); padding: 4px 9px; font-size: 11px; font-weight: 750; }
+    .book-list, .loan-list { display: grid; gap: 12px; }
+    .book-card, .loan-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: white; }
+    .book-card { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+    .book-title { font-weight: 750; font-size: 16px; margin: 0 0 4px; }
+    .book-author, .book-meta { color: var(--muted); font-size: 13px; }
+    .book-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+    .tag { color: #42644e; background: #eaf1e8; border-radius: 99px; padding: 4px 9px; font-size: 11px; font-weight: 700; }
+    .availability { white-space: nowrap; text-align: right; }
+    .availability small { display: block; color: var(--muted); margin-bottom: 8px; }
+    .availability .unavailable { color: var(--red); }
+    .loan-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .loan-due { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .loan-due.overdue { color: var(--red); font-weight: 700; }
+    .loan-empty, .empty-state { color: var(--muted); font-size: 14px; line-height: 1.55; padding: 16px; background: #f5f6f1; border-radius: 10px; }
+    .add-book { margin-top: 18px; }
+    .add-book summary { cursor: pointer; color: var(--green-dark); font-weight: 700; font-size: 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin-top: 8px; }
+    .form-grid .field-wide { grid-column: 1 / -1; }
+    .fine-print { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 12px 0 0; }
+    footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 38px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 720px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+      .auth-grid { grid-template-columns: 1fr; max-width: 480px; }
+      .book-filters { grid-template-columns: 1fr 1fr; }
+      .topbar-inner, main { width: min(100% - 28px, 1080px); }
+      main { padding-top: 30px; }
+    }
+    @media (max-width: 480px) {
+      .top-actions { gap: 8px; }
+      .top-actions #welcomeName { display: none; }
+      .welcome { align-items: start; }
+      .book-card { align-items: start; }
+      .section-heading { align-items: stretch; flex-direction: column; }
+      .section-heading input { max-width: none; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .field-wide { grid-column: auto; }
+      .admin-stats { gap: 7px; }
+      .stat-card { padding: 12px; }
+      .stat-card strong { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>    <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">▤</div>
+        <div><div class="brand-name">Local Books</div><div class="brand-caption">Your neighborhood library</div></div>
+      </div>
+      <div class="top-actions" id="memberActions" hidden>
+        <button class="profile-trigger" id="profileTrigger" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Profile">
+          <span class="profile-avatar" id="profileAvatar" aria-hidden="true">L</span>
+          <span class="member-name" id="welcomeName">Library Admin</span>
+        </button>
+        <span class="role-pill" id="roleBadge"></span>
+        <button class="signout-btn" id="logoutButton" type="button">Sign out</button>
+        <div class="profile-popout-backdrop" id="profileBackdrop" tabindex="-1" aria-hidden="true"></div>
+        <div class="profile-popout" id="profilePopout" role="dialog" aria-modal="false" aria-label="Profile">
+          <h3>Profile</h3>
+          <div class="profile-user">
+            <span class="profile-avatar" id="profilePopoutAvatar" aria-hidden="true">L</span>
+            <div>
+              <div class="user-name" id="profileUserName"></div>
+              <div class="user-meta" id="profileUserMeta"></div>
+            </div>
+          </div>
+          <div class="profile-section">
+            <div class="profile-section-title">Settings</div>
+            <ul class="profile-menu">
+              <li><button type="button" class="manage-account-btn" id="manageAccountBtn"><span class="icon" aria-hidden="true">⚙</span> Manage Account</button></li>
+            </ul>
+          </div>
+          <div class="profile-section">
+            <ul class="profile-menu">
+              <li><button type="button" class="danger" id="logoutBtn"><span class="icon" aria-hidden="true">↳</span> Log Out</button></li>
+            </ul>
+          </div>
+          <div class="manage-account" id="manageAccountPanel" hidden>
+            <div class="profile-section-title">Manage Account</div>
+            <p>Update your account details here. This is a placeholder for the Manage Account screen.</p>
+            <div class="field"><label for="manageDisplayName">Display name</label><input id="manageDisplayName" type="text" maxlength="120"></div>
+            <div class="field"><label for="manageEmail">Email</label><input id="manageEmail" type="email" maxlength="254"></div>
+            <button class="button button-small" id="saveAccountBtn" type="button">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="notice notice-error" id="errorNotice" role="alert" hidden></div>
+    <div class="notice notice-success" id="successNotice" role="status" hidden></div>
+
+    <section id="guestView">
+      <div class="hero">
+        <div class="eyebrow">Read · Share · Return</div>
+        <h1>Good books are better when shared.</h1>
+        <p>Join your local bookshelf, find your next read, and keep track of every book you borrow.</p>
+      </div>
+      <div id="loginView">
+        <form class="panel auth-card" id="loginForm">
+          <h2>Welcome back</h2>
+          <p class="panel-intro">Sign in to see the catalog and your loans.</p>
+          <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" name="username" autocomplete="username" required maxlength="32"></div>
+          <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required maxlength="256"></div>
+          <button class="button full-button" type="submit">Sign in</button>
+          <p class="auth-switch">New to the library? <button class="text-button" id="showRegister" type="button">Create an account</button></p>
+        </form>
+      </div>
+      <div id="registerView" hidden>
+        <form class="panel auth-card" id="registerForm">
+          <h2>Create your account</h2>
+          <p class="panel-intro">Sign up as a library member. The first account becomes the administrator.</p>
+          <p class="fine-print">First name, last name, email, username, and password are required.</p>
+          <div class="field"><label for="registerFirstName">First name</label><input id="registerFirstName" name="firstName" autocomplete="given-name" required maxlength="80"></div>
+          <div class="field"><label for="registerLastName">Last name</label><input id="registerLastName" name="lastName" autocomplete="family-name" required maxlength="80"></div>
+          <div class="field"><label for="registerEmail">Email</label><input id="registerEmail" name="email" type="email" autocomplete="email" required maxlength="254"></div>
+          <div class="field"><label for="registerUsername">Choose a username</label><input id="registerUsername" name="username" autocomplete="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]{3,32}" title="Use 3-32 letters, numbers, dots, dashes, or underscores."></div>
+          <div class="field"><label for="registerPassword">Create a password</label><input id="registerPassword" name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="256"></div>
+          <button class="button full-button" type="submit">Create account</button>
+          <p class="auth-switch">Already have an account? <button class="text-button" id="showLogin" type="button">Sign in</button></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="memberView" hidden>
+      <div class="welcome">
+        <div id="memberWelcome">
+          <div class="eyebrow">Your community library</div>
+          <h1>Find your next read.</h1>
+          <p>Borrow a book for 14 days and return it on time for another reader.</p>
+        </div>
+        <div id="adminWelcome" hidden>
+          <div class="eyebrow">Administrator dashboard</div>
+          <h1>Library overview.</h1>
+          <p>Manage the catalog and keep track of active loans.</p>
+        </div>
+      </div>
+      <div class="admin-stats" id="adminStats" hidden>
+        <div class="stat-card"><strong id="statBookCount">0</strong><span>Titles in catalog</span></div>
+        <div class="stat-card"><strong id="statAvailableCount">0</strong><span>Copies available</span></div>
+        <div class="stat-card"><strong id="statLoanCount">0</strong><span>Active loans</span></div>
+      </div>
+      <div class="workspace-grid">
+        <section class="panel" aria-labelledby="catalogHeading">
+          <div class="section-heading"><h2 id="catalogHeading">Book catalog</h2></div>
+          <div class="book-filters" aria-label="Filter books">
+            <input id="searchInput" type="search" placeholder="Search title, author, category" aria-label="Search the catalog">
+            <select id="categoryFilter" aria-label="Filter by category"><option value="">All categories</option></select>
+            <select id="availabilityFilter" aria-label="Filter by availability">
+              <option value="all">All books</option>
+              <option value="available">Available</option>
+              <option value="unavailable">Checked out</option>
+            </select>
+            <select id="sortFilter" aria-label="Sort books">
+              <option value="title">Title A–Z</option>
+              <option value="author">Author A–Z</option>
+              <option value="available">Most available</option>
+            </select>
+          </div>
+          <div class="book-list" id="bookList" aria-live="polite"></div>
+          <details class="add-book" id="addBookPanel" hidden>
+            <summary>Add a book to the catalog</summary>
+            <form id="addBookForm">
+              <div class="form-grid">
+                <div class="field field-wide"><label for="bookTitle">Title</label><input id="bookTitle" name="title" required maxlength="160"></div>
+                <div class="field field-wide"><label for="bookAuthor">Author</label><input id="bookAuthor" name="author" required maxlength="120"></div>
+                <div class="field"><label for="bookCategory">Category</label><input id="bookCategory" name="category" maxlength="60"></div>
+                <div class="field"><label for="bookCopies">Copies</label><input id="bookCopies" name="copies" type="number" value="1" min="1" max="999" required></div>
+                <div class="field field-wide"><label for="bookIsbn">ISBN (optional)</label><input id="bookIsbn" name="isbn" maxlength="20"></div>
+              </div>
+              <button class="button button-small" type="submit">Add book</button>
+            </form>
+          </details>
+        </section>
+        <section class="panel" aria-labelledby="loansHeading">
+          <div class="section-heading"><h2 id="loansHeading">My borrowed books</h2></div>
+          <div class="loan-list" id="loanList" aria-live="polite"></div>
+          <p class="fine-print" id="loanHelp">Your due date is shown on each loan. Returning a book makes the copy available to other members immediately.</p>
+        </section>
+      </div>
+    </section>
+    <footer>Local Books · A small library, shared by everyone.</footer>
+  </main>
+
+  <script>    const guestView = document.getElementById("guestView");
+    const loginView = document.getElementById("loginView");
+    const registerView = document.getElementById("registerView");
+    const memberView = document.getElementById("memberView");
+    const memberActions = document.getElementById("memberActions");
+    const errorNotice = document.getElementById("errorNotice");
+    const successNotice = document.getElementById("successNotice");
+    const bookList = document.getElementById("bookList");
+    const loanList = document.getElementById("loanList");
+    const profileTrigger = document.getElementById("profileTrigger");
+    const profilePopout = document.getElementById("profilePopout");
+    const profileBackdrop = document.getElementById("profileBackdrop");
+    const profileAvatar = document.getElementById("profileAvatar");
+    const profilePopoutAvatar = document.getElementById("profilePopoutAvatar");
+    const profileUserName = document.getElementById("profileUserName");
+    const profileUserMeta = document.getElementById("profileUserMeta");
+    const roleBadge = document.getElementById("roleBadge");
+    const manageAccountPanel = document.getElementById("manageAccountPanel");
+    const manageDisplayName = document.getElementById("manageDisplayName");
+    const manageEmail = document.getElementById("manageEmail");
+    let currentUser = null;
+    let books = [];
+    let profileOpen = false;
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[character]));
+    }
+
+    function showError(message) {
+      successNotice.hidden = true;
+      errorNotice.textContent = message;
+      errorNotice.hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showSuccess(message) {
+      errorNotice.hidden = true;
+      successNotice.textContent = message;
+      successNotice.hidden = false;
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        credentials: "same-origin"
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+      return result;
+    }
+
+    function setSignedIn(user) {
+      const signedIn = Boolean(user);
+      currentUser = user;
+      guestView.hidden = signedIn;
+      memberView.hidden = !signedIn;
+      memberActions.hidden = !signedIn;
+      document.getElementById("welcomeName").textContent = signedIn ? user.displayName : "";
+      document.getElementById("roleBadge").textContent =
+        signedIn ? (user.role === "admin" ? "ADMIN" : "MEMBER") : "";
+      document.getElementById("memberWelcome").hidden = !signedIn || user.role === "admin";
+      document.getElementById("adminWelcome").hidden = !signedIn || user.role !== "admin";
+      document.getElementById("adminStats").hidden = !signedIn || user.role !== "admin";
+      document.getElementById("addBookPanel").hidden = !signedIn || user.role !== "admin";
+      document.getElementById("loansHeading").textContent =
+        signedIn && user.role === "admin" ? "All active loans" : "My borrowed books";
+      document.getElementById("loanHelp").textContent =
+        signedIn && user.role === "admin"
+          ? "Administrator view: active loans for all library members."
+          : "Your due date is shown on each loan. Returning a book makes the copy available to other members immediately.";
+      if (!signedIn) {
+        loginView.hidden = false;
+        registerView.hidden = true;
+      }
+      closeProfile();
+      applyUserToProfile(user);
+    }
+
+    function applyUserToProfile(user) {
+      if (!user) {
+        profileAvatar.textContent = "";
+        profilePopoutAvatar.textContent = "";
+        profileUserName.textContent = "";
+        profileUserMeta.textContent = "";
+        return;
+      }
+      const initial = (user.displayName || user.username || "").charAt(0).toUpperCase();
+      profileAvatar.textContent = initial;
+      profilePopoutAvatar.textContent = initial;
+      profileUserName.textContent = user.displayName || user.username || "";
+      const metaParts = [
+        user.email || "No email set",
+        user.role === "admin" ? "Administrator" : "Member",
+      ];
+      profileUserMeta.textContent = metaParts.join(" · ");
+    }
+
+    function formatDate(value) {
+      return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(value));
+    }
+
+    function renderBooks() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const selectedCategory = document.getElementById("categoryFilter").value;
+      const selectedAvailability = document.getElementById("availabilityFilter").value;
+      const sortBy = document.getElementById("sortFilter").value;
+      const matches = books.filter((book) => {
+        const textMatches = [book.title, book.author, book.category, book.isbn]
+          .some((value) => String(value || "").toLowerCase().includes(query));
+        const categoryMatches = !selectedCategory || book.category === selectedCategory;
+        const available = Number(book.available);
+        const availabilityMatches =
+          selectedAvailability === "all" ||
+          (selectedAvailability === "available" && available > 0) ||
+          (selectedAvailability === "unavailable" && available === 0);
+        return textMatches && categoryMatches && availabilityMatches;
+      }).sort((left, right) => {
+        if (sortBy === "author") return left.author.localeCompare(right.author) || left.title.localeCompare(right.title);
+        if (sortBy === "available") return Number(right.available) - Number(left.available) || left.title.localeCompare(right.title);
+        return left.title.localeCompare(right.title) || left.author.localeCompare(right.author);
+      });
+      if (!matches.length) {
+        bookList.innerHTML = `<div class="empty-state">${books.length ? "No books match your search." : "There are no books in the catalog yet. Add one below."}</div>`;
+        return;
+      }
+      bookList.innerHTML = matches.map((book) => {
+        const available = Number(book.available);
+        return `<article class="book-card">
+          <div><p class="book-title">${escapeHtml(book.title)}</p>
+          <div class="book-author">by ${escapeHtml(book.author)}</div>
+          <div class="book-meta">${book.category ? `<span class="tag">${escapeHtml(book.category)}</span>` : ""}
+          <span>${available} of ${Number(book.copies)} available</span></div></div>
+          <div class="availability"><small class="${available ? "" : "unavailable"}">${available ? "Ready to borrow" : "All copies borrowed"}</small>
+          <button class="button button-small borrow-button" data-book-id="${Number(book.id)}" ${available ? "" : "disabled"}>Borrow</button></div>
+        </article>`;
+      }).join("");
+    }
+
+    function updateCategoryFilter() {
+      const filter = document.getElementById("categoryFilter");
+      const selected = filter.value;
+      const categories = [...new Set(books.map((book) => book.category).filter(Boolean))]
+        .sort((left, right) => left.localeCompare(right));
+      filter.innerHTML = `<option value="">All categories</option>${categories.map((category) =>
+        `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`
+      ).join("")}`;
+      if (categories.includes(selected)) filter.value = selected;
+    }
+
+    function renderLoans(loans) {
+      if (!loans.length) {
+        loanList.innerHTML = `<div class="loan-empty">${currentUser && currentUser.role === "admin"
+          ? "There are no active loans."
+          : "You don't have any books checked out. Browse the catalog to get started."}</div>`;
+        return;
+      }
+      loanList.innerHTML = loans.map((loan) => {
+        const overdue = new Date(loan.due_at).getTime() < Date.now();
+        const borrower = currentUser && currentUser.role === "admin"
+          ? `<div class="loan-due">Borrowed by ${escapeHtml(`${loan.first_name} ${loan.last_name}`.trim() || loan.username)}</div>`
+          : "";
+        return `<article class="loan-card">
+          <div><div class="book-title">${escapeHtml(loan.title)}</div>
+          <div class="book-author">${escapeHtml(loan.author)}</div>
+          ${borrower}
+          <div class="loan-due ${overdue ? "overdue" : ""}">${overdue ? "Overdue · " : "Due "}${formatDate(loan.due_at)}</div></div>
+          <button class="button button-secondary button-small return-button" data-loan-id="${Number(loan.id)}">Return</button>
+        </article>`;
+      }).join("");
+    }
+
+    async function refreshLibrary() {
+      const [bookResult, loanResult] = await Promise.all([api("/api/books"), api("/api/loans")]);
+      books = bookResult.books;
+      updateCategoryFilter();
+      renderBooks();
+      renderLoans(loanResult.loans);
+      document.getElementById("statBookCount").textContent = String(books.length);
+      document.getElementById("statAvailableCount").textContent =
+        String(books.reduce((total, book) => total + Number(book.available), 0));
+      document.getElementById("statLoanCount").textContent = String(loanResult.loans.length);
+    }
+
+    async function handleForm(form, path, onSuccess) {
+      const submit = form.querySelector('button[type="submit"]');
+      submit.disabled = true;
+      errorNotice.hidden = true;
+      try {
+        const data = Object.fromEntries(new FormData(form));
+        const result = await api(path, { method: "POST", body: JSON.stringify(data) });
+        form.reset();
+        if (onSuccess) await onSuccess(result);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        submit.disabled = false;
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleForm(event.currentTarget, "/api/login", async (result) => {
+        setSignedIn(result.user);
+        await refreshLibrary();
+        showSuccess(`Welcome back, ${result.user.firstName}.`);
+      });
+    });
+
+    document.getElementById("showRegister").addEventListener("click", () => {
+      errorNotice.hidden = true;
+      loginView.hidden = true;
+      registerView.hidden = false;
+    });
+
+    document.getElementById("showLogin").addEventListener("click", () => {
+      errorNotice.hidden = true;
+      registerView.hidden = true;
+      loginView.hidden = false;
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleForm(event.currentTarget, "/api/register", async (result) => {
+        setSignedIn(result.user);
+        await refreshLibrary();
+        showSuccess(result.user.role === "admin"
+          ? "Your account is ready. As the first member, you are the library administrator."
+          : "Your member account is ready. Welcome to Local Books!");
+      });
+    });
+
+    document.getElementById("addBookForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector('button[type="submit"]');
+      submit.disabled = true;
+      errorNotice.hidden = true;
+      const data = Object.fromEntries(new FormData(form));
+      data.copies = Number(data.copies);
+      api("/api/books", { method: "POST", body: JSON.stringify(data) })
+        .then(async () => {
+          form.reset();
+          document.getElementById("bookCopies").value = "1";
+          await refreshLibrary();
+          showSuccess("Book added to the catalog.");
+        })
+        .catch((error) => showError(error.message))
+        .finally(() => { submit.disabled = false; });
+    });
+
+    bookList.addEventListener("click", async (event) => {
+      const button = event.target.closest(".borrow-button");
+      if (!button) return;
+      button.disabled = true;
+      try {
+        const result = await api("/api/borrow", {
+          method: "POST",
+          body: JSON.stringify({ bookId: Number(button.dataset.bookId) })
+        });
+        await refreshLibrary();
+        showSuccess(`Book borrowed. Please return it by ${formatDate(result.dueAt)}.`);
+      } catch (error) {
+        showError(error.message);
+        await refreshLibrary();
+      }
+    });
+
+    loanList.addEventListener("click", async (event) => {
+      const button = event.target.closest(".return-button");
+      if (!button) return;
+      button.disabled = true;
+      try {
+        await api(`/api/loans/${Number(button.dataset.loanId)}/return`, { method: "POST", body: "{}" });
+        await refreshLibrary();
+        showSuccess("Book returned. Thank you!");
+      } catch (error) {
+        showError(error.message);
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      try {
+        await api("/api/logout", { method: "POST", body: "{}" });
+        setSignedIn(null);
+        errorNotice.hidden = true;
+        showSuccess("You have signed out.");
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    function openProfile() {
+      if (!currentUser) return;
+      profileOpen = true;
+      profilePopout.classList.add("open");
+      profileBackdrop.classList.add("show");
+      profileTrigger.setAttribute("aria-expanded", "true");
+      const firstButton = profilePopout.querySelector("button");
+      if (firstButton) setTimeout(() => firstButton.focus(), 0);
+    }
+
+    function closeProfile() {
+      profileOpen = false;
+      profilePopout.classList.remove("open");
+      profileBackdrop.classList.remove("show");
+      profileTrigger.setAttribute("aria-expanded", "false");
+      if (profileTrigger) profileTrigger.focus();
+    }
+
+    profileTrigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (profileOpen) {
+        closeProfile();
+      } else {
+        openProfile();
+      }
+    });
+
+    profileBackdrop.addEventListener("click", closeProfile);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && profileOpen) {
+        closeProfile();
+        event.preventDefault();
+      }
+    });
+
+    profilePopout.addEventListener("keydown", (event) => {
+      if (event.key !== "Tab") return;
+      const buttons = Array.from(profilePopout.querySelectorAll("button")).filter((button) => button.offsetParent !== null || button === document.activeElement);
+      if (!buttons.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    document.getElementById("manageAccountBtn").addEventListener("click", () => {
+      manageAccountPanel.hidden = false;
+      const focusable = manageAccountPanel.querySelector("input, button");
+      if (focusable) setTimeout(() => focusable.focus(), 0);
+    });
+
+    document.getElementById("saveAccountBtn").addEventListener("click", async () => {
+      const displayName = manageDisplayName.value.trim();
+      const email = manageEmail.value.trim();
+      if (!displayName) {
+        errorNotice.textContent = "Display name is required.";
+        errorNotice.hidden = false;
+        return;
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorNotice.textContent = "Enter a valid email address.";
+        errorNotice.hidden = false;
+        return;
+      }
+      try {
+        await api("/api/account", {
+          method: "POST",
+          body: JSON.stringify({ displayName, email }),
+        });
+        showSuccess("Account updated.");
+        await refreshAccount();
+        closeProfile();
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      closeProfile();
+      try {
+        await api("/api/logout", { method: "POST", body: "{}" });
+        setSignedIn(null);
+        errorNotice.hidden = true;
+        showSuccess("You have signed out.");
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderBooks);
+    document.getElementById("categoryFilter").addEventListener("change", renderBooks);
+    document.getElementById("availabilityFilter").addEventListener("change", renderBooks);
+    document.getElementById("sortFilter").addEventListener("change", renderBooks);
+
+    async function refreshAccount() {
+      try {
+        const session = await api("/api/session");
+        setSignedIn(session.user);
+        if (session.user) await refreshLibrary();
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    api("/api/session")
+      .then(async ({ user }) => {
+        setSignedIn(user);
+        if (user) await refreshLibrary();
+      })
+      .catch((error) => showError(error.message));
+  </script>
+</body>
+</html>
