@@ -37,8 +37,15 @@ CREATE INDEX IF NOT EXISTS idx_loans_active_book
 CREATE INDEX IF NOT EXISTS idx_loans_user_active
     ON loans(user_id, returned_at);
 
-INSERT OR IGNORE INTO books (title, author, category, isbn, copies) VALUES
-    ('Pride and Prejudice', 'Jane Austen', 'Classic fiction', '9780141439518', 2),
-    ('The Adventures of Sherlock Holmes', 'Arthur Conan Doyle', 'Mystery', NULL, 1),
-    ('The Secret Garden', 'Frances Hodgson Burnett', 'Children''s fiction', '9780141321065', 1),
-    ('A Brief History of Time', 'Stephen Hawking', 'Science', '9780553380163', 1);
+INSERT OR IGNORE INTO books (title, author, category, isbn, copies)
+SELECT 'Pride and Prejudice', 'Jane Austen', 'Classic fiction', '9780141439518', 2
+WHERE NOT EXISTS (SELECT 1 FROM books WHERE title = 'Pride and Prejudice' AND author = 'Jane Austen');
+INSERT OR IGNORE INTO books (title, author, category, isbn, copies)
+SELECT 'The Adventures of Sherlock Holmes', 'Arthur Conan Doyle', 'Mystery', NULL, 1
+WHERE NOT EXISTS (SELECT 1 FROM books WHERE title = 'The Adventures of Sherlock Holmes' AND author = 'Arthur Conan Doyle');
+INSERT OR IGNORE INTO books (title, author, category, isbn, copies)
+SELECT 'The Secret Garden', 'Frances Hodgson Burnett', 'Children''s fiction', '9780141321065', 1
+WHERE NOT EXISTS (SELECT 1 FROM books WHERE title = 'The Secret Garden' AND author = 'Frances Hodgson Burnett');
+INSERT OR IGNORE INTO books (title, author, category, isbn, copies)
+SELECT 'A Brief History of Time', 'Stephen Hawking', 'Science', '9780553380163', 1
+WHERE NOT EXISTS (SELECT 1 FROM books WHERE title = 'A Brief History of Time' AND author = 'Stephen Hawking');

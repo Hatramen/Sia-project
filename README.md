@@ -48,3 +48,19 @@ The database schema and starter catalog are defined in [DB.SQL](./DB.SQL).
 If you see a database-column error after updating the app, stop the running
 server with **Ctrl+C** and start it again with `py App.py`. Startup applies the
 account-field migration to the existing `library.db`; do not delete the database.
+
+## Deploy on Vercel
+
+Vercel runs the Flask entrypoint in [server.py](./server.py) (WSGI `app`;
+dependencies in [requirements.txt](./requirements.txt)). It serves `/` and all
+`/api/*` routes, so the previous `404` (no entrypoint) is fixed.
+
+1. Import the repo in Vercel.
+2. Set the `SECRET_KEY` environment variable to a long random value
+   (it signs login cookies). Without it the app uses an insecure dev fallback.
+3. Deploy. No build command is needed.
+
+Limits: on Vercel the SQLite database lives at `/tmp/library.db` and is
+reseeded from [DB.SQL](./DB.SQL), so data does not persist across
+deployments or instances. Local `py App.py` behavior is unchanged and still
+uses `./library.db`. For durable cloud data, use Postgres instead of SQLite.

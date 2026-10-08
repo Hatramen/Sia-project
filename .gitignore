@@ -4,6 +4,9 @@ __pycache__/
 *.db-*
 *.bak
 *.log
+.vercel/
+.venv/
+venv/
 App.py.fixed.txt
 library_admin_note.md
 reset-local-books.md
